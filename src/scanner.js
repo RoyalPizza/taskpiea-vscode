@@ -20,10 +20,8 @@ export class Scanner {
      * @returns {Promise<{ issues: { keyword: string, file: string, lineNumber: number, content: string }[] }>} A promise that resolves with an object containing an array of issues found in the workspace.
      */
     async scan(fileName, settings, issuesLineNumber) {
+        if (issuesLineNumber === -1) return { issues: [] };
 
-        if (issuesLineNumber === -1) return;
-
-        let issues = [];
         let keywords = [];
         let excludePatterns = [];
 
@@ -33,43 +31,47 @@ export class Scanner {
                     keywords.push(setting.value.trim());
                     break;
                 case core.SETTINGS_KEYS.SCANNER_EXCLUDE:
-                    excludePatterns.push(setting.value.trim());
+                    const trimmedValue = setting.value.trim();
+                    excludePatterns.push(trimmedValue.startsWith('**/') && trimmedValue.endsWith('/**') ? trimmedValue : `**/${trimmedValue}/**`);
                     break;
             }
         }
 
-        // if we have no keywords, there is no way to scan
-        if (keywords.length === 0) return;
-
-        // Ensure we always exclude .taskp files if not already present
+        if (keywords.length === 0) return { issues: [] };
         if (!excludePatterns.some(pattern => pattern.includes('.taskp'))) {
-            excludePatterns.push('*.taskp');
+            excludePatterns.push('**/*.taskp/**');
         }
 
-        // we need to keep a line number with our TODO in the taskp file for vscode decorators
-        let newIssueLineNumber = issuesLineNumber + 1;
+        const includePatterns = core.CODE_FILE_EXTENSIONS?.map(ext => `**/*${ext}`) ?? ['**/*'];
+        excludePatterns.push(...(core.EXCLUDED_DIRECTORIES?.map(dir => `**/${dir}/**`) ?? []));
 
-        const files = await vscode.workspace.findFiles('**/*', `{${excludePatterns.join(',')}}`);
-        for (const file of files) {
+        const files = await vscode.workspace.findFiles(`{${includePatterns.join(',')}}`, `{${excludePatterns.join(',')}}`);
+        let newIssueLineNumber = issuesLineNumber + 1;
+        const issues = [];
+
+        await Promise.all(files.map(async file => {
             try {
                 const document = await vscode.workspace.openTextDocument(file);
                 const text = document.getText().split(/\r?\n/);
                 for (let i = 0; i < text.length; i++) {
                     const line = text[i];
                     for (const keyword of keywords) {
-                        if (line.includes(keyword)) {
-                            const issue = { keyword, file: vscode.workspace.asRelativePath(file), lineNumber: i, content: line.trim() };
+                        if (line.match(new RegExp(`\\b${keyword}\\b`, 'i'))) {
+                            issues.push({
+                                keyword,
+                                file: vscode.workspace.asRelativePath(file),
+                                lineNumber: i,
+                                content: line.trim()
+                            });
                             newIssueLineNumber++;
-                            issues.push(issue);
                             break;
                         }
                     }
                 }
             } catch (e) {
-                // Skip non-text files (e.g., binary)
-                continue;
+                // Skip non-text files
             }
-        }
+        }));
 
         return { issues };
     }

@@ -12,11 +12,6 @@
             "name": "comment.line.double-dash.taskp"
         },
         {
-            "begin": "/\\*",
-            "end": "\\*/",
-            "name": "comment.block.cstyle.taskp"
-        },
-        {
             "begin": "<!--",
             "end": "-->",
             "name": "comment.block.htmlstyle.taskp"

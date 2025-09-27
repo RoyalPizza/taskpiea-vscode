@@ -2,7 +2,7 @@
     "name": "taskpiea",
     "displayName": "Taskpiea",
     "description": "Task management for .taskp files with auto task ID generation and user autocomplete",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "icon": "images/icon.jpg",
     "publisher": "royalpizza",
     "repository": {

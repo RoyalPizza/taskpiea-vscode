@@ -42,6 +42,24 @@ export const SETTINGS_KEYS = {
     SCANNER_KEYWORD: 'Scanner.Keyword',
     SCANNER_EXCLUDE: 'Scanner.Exclude',
 };
+
+export const CODE_FILE_EXTENSIONS = [
+  '.js', '.ts', '.jsx', '.tsx', '.py', '.java', '.cpp', '.c', '.h', '.hpp',
+  '.cs', '.go', '.rb', '.php', '.kt', '.swift', '.rs', '.sh', '.bash',
+  '.m', '.mm', '.pl', '.pm', '.r', '.lua', '.dart', '.fs', '.fsi', '.fsx',
+  '.vb', '.scala', '.groovy', '.erl', '.ex', '.exs', '.clj', '.cljs', '.cljc',
+  '.hs', '.lhs', '.asm', '.s', '.pas', '.pp', '.d', '.ada', '.adb', '.ads',
+  '.f', '.for', '.f90', '.f95', '.f03', '.f08', '.jl', '.ps1', '.psm1',
+  '.vbs', '.bat', '.cmd', '.vue', '.svelte', '.astro'
+];
+
+export const EXCLUDED_DIRECTORIES = [
+    '.git', 'node_modules', '.venv', 'venv', 'env', '.idea', '.vscode',
+    'dist', 'build', 'out', 'target', 'bin', 'obj', 'coverage', '__pycache__',
+    '.pytest_cache', '.tox', '.cache', 'vendor', 'bower_components', '.next',
+    '.nuxt', 'logs', 'tmp', 'temp', '.DS_Store'
+];
+
 export const NEW_FILE_TEXT = 
 `[TASKS]
 - Example task @alice [#A1B2C]

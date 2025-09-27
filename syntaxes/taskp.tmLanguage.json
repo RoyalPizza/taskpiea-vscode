@@ -1,0 +1,45 @@
+{
+    "name": "Taskpiea",
+    "scopeName": "source.taskp",
+    "fileTypes": [".taskp"],
+    "patterns": [
+        {
+            "match": "^\\s*//.*$",
+            "name": "comment.line.double-slash.taskp"
+        },
+        {
+            "match": "^\\s*--.*$",
+            "name": "comment.line.double-dash.taskp"
+        },
+        {
+            "begin": "/\\*",
+            "end": "\\*/",
+            "name": "comment.block.cstyle.taskp"
+        },
+        {
+            "begin": "<!--",
+            "end": "-->",
+            "name": "comment.block.htmlstyle.taskp"
+        },
+        {
+            "match": "\\[([#][A-Z0-9]{5})\\]",
+            "captures": {
+                "1": {
+                    "name": "string.quoted.taskp"
+                }
+            }
+        },
+        {
+            "match": "\\[(\\w+)\\]",
+            "captures": {
+                "1": {
+                    "name": "string.quoted.taskp"
+                }
+            }
+        },
+        {
+            "match": "@\\w+",
+            "name": "entity.name.tag.taskp"
+        }
+    ]
+}

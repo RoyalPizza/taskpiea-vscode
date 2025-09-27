@@ -26,6 +26,7 @@ export class Scanner {
         let issues = [];
         let keywords = [];
         let excludePatterns = [];
+        let includePatterns = [];
 
         for (const setting of settings) {
             switch (setting.key) {
@@ -41,15 +42,15 @@ export class Scanner {
         // if we have no keywords, there is no way to scan
         if (keywords.length === 0) return;
 
-        // Ensure we always exclude .taskp files if not already present
-        if (!excludePatterns.some(pattern => pattern.includes('.taskp'))) {
-            excludePatterns.push('*.taskp');
-        }
-
         // we need to keep a line number with our TODO in the taskp file for vscode decorators
         let newIssueLineNumber = issuesLineNumber + 1;
 
-        const files = await vscode.workspace.findFiles('**/*', `{${excludePatterns.join(',')}}`);
+        // add default incldues and excludes
+        includePatterns.push(... core.CODE_FILE_EXTENSIONS.map(ext => `**/*${ext}`));
+        excludePatterns.push(...core.EXCLUDED_DIRECTORIES.map(dir => `**/${dir}/**`));
+        excludePatterns.push('*.taskp');
+        
+        const files = await vscode.workspace.findFiles(`{${includePatterns.join(',')}}`, `{${excludePatterns.join(',')}}`);
         for (const file of files) {
             try {
                 const document = await vscode.workspace.openTextDocument(file);
@@ -57,7 +58,7 @@ export class Scanner {
                 for (let i = 0; i < text.length; i++) {
                     const line = text[i];
                     for (const keyword of keywords) {
-                        if (line.includes(keyword)) {
+                        if (line.match(new RegExp(`\\b${keyword}\\b`, 'i'))) {
                             const issue = { keyword, file: vscode.workspace.asRelativePath(file), lineNumber: i, content: line.trim() };
                             newIssueLineNumber++;
                             issues.push(issue);

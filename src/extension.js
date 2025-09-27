@@ -3,6 +3,7 @@ import * as core from './core.js';
 import * as tpParser from './parser.js';
 import * as tpScanner from './scanner.js';
 import * as tpLens from './codeLens.js'
+import { performance } from 'perf_hooks';
 
 /** @type {Set<string>} Tracks files currently being processed */
 const processingFiles = new Set();
@@ -125,6 +126,8 @@ async function _processDocument(document, useScanner) {
     if (processingFiles.has(document.fileName)) return;
     processingFiles.add(document.fileName);
 
+    //const startTime = performance.now();
+
     const parser = new tpParser.Parser();
     parser.parse(document, useScanner);
     if (useScanner && parser.issuesLineNumber != -1) {
@@ -136,6 +139,10 @@ async function _processDocument(document, useScanner) {
 
     const text = parser.textData.join('\n');
     await _applyTextEdit(document, text);
+
+    // const endTime = performance.now();
+    // const ms = (endTime - startTime).toFixed(2);
+    // console.log(`Processed ${document.fileName} in ${ms}ms`);
 
     processingFiles.delete(document.fileName);
 }

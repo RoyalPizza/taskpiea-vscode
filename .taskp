@@ -3,8 +3,10 @@
     -- keep the standard theming support, but add more variety
 - do a performance test on project with large codebases [#3F6A4]
     -- record some metrics so I have an idea if I need to switch to grep or something
+    -- UPDATE: one project I am using takes 7s to run the canner. Definitley need to refactor.
 - do a stress test of the exclude system for the scanner  [#85FD9]
     -- basically make sure that it works when loosley formatted
+    -- UPDATE: I made some changes to this for v1.0.1. 
 - make a real icon for the extension and .taskp files [#DE5EB]
     -- keep the clouds and golden icon reference as a homage to skypiea
 - update categories in project.json [#1BB10]
@@ -20,14 +22,16 @@
     -- no reason to allow the flexibility to search keywords in non code files. 
     -- this should help speed up the search through files drastically.
     -- UPDATE: I hard coded this as a quick solution. But need to think on this.
-- is this working?
 
 [ISSUES]
-- // TODO: reset our scanner because the workspace changed? [src/extension.js::65]
-- // TODO: pull this from a cache instead of calling this again [src/extension.js::161]
-- // TODO: this method will not mark the file as dirty of the taskp file is open. But hitting save will save changes. Find solution that shows the file as dirty. [src/extension.js::172]
-- // we need to keep a line number with our TODO in the taskp file for vscode decorators [src/scanner.js::48]
+- Scanner.Keyword: TODO [src/core.js::73]
+- Scanner.Keyword: FIXME [src/core.js::74]
+- // TODO: this is iffy. what if users want to be more explicity with this? [src/scanner.js::36]
+- // we need to keep a line number with our TODO in the taskp file for vscode decorators [src/scanner.js::50]
 - // TODO: consider storing usedIds as ints for faster lookup over the hex string? (future) [src/parser.js::10]
+- // TODO: reset our scanner because the workspace changed? [src/extension.js::66]
+- // TODO: pull this from a cache instead of calling this again [src/extension.js::168]
+- // TODO: this method will not mark the file as dirty of the taskp file is open. But hitting save will save changes. Find solution that shows the file as dirty. [src/extension.js::179]
 
 [USERS]
 - royalpizza

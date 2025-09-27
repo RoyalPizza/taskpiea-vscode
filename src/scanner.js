@@ -34,7 +34,13 @@ export class Scanner {
                     keywords.push(setting.value.trim());
                     break;
                 case core.SETTINGS_KEYS.SCANNER_EXCLUDE:
-                    excludePatterns.push(setting.value.trim());
+                    // TODO: this is iffy. what if users want to be more explicity with this?
+                    const trimmedValue = setting.value.trim();
+                    if (!trimmedValue.startsWith('**/') || !trimmedValue.endsWith('/**')) {
+                        excludePatterns.push(`**/${trimmedValue}/**`);
+                    } else {
+                        excludePatterns.push(trimmedValue);
+                    }
                     break;
             }
         }
@@ -46,12 +52,14 @@ export class Scanner {
         let newIssueLineNumber = issuesLineNumber + 1;
 
         // add default incldues and excludes
-        includePatterns.push(... core.CODE_FILE_EXTENSIONS.map(ext => `**/*${ext}`));
+        includePatterns.push(...core.CODE_FILE_EXTENSIONS.map(ext => `**/*${ext}`));
         excludePatterns.push(...core.EXCLUDED_DIRECTORIES.map(dir => `**/${dir}/**`));
         excludePatterns.push('*.taskp');
-        
+
         const files = await vscode.workspace.findFiles(`{${includePatterns.join(',')}}`, `{${excludePatterns.join(',')}}`);
+        //console.log(files.length + " files found to scan");
         for (const file of files) {
+            //console.log("scanning " + file.path);
             try {
                 const document = await vscode.workspace.openTextDocument(file);
                 const text = document.getText().split(/\r?\n/);

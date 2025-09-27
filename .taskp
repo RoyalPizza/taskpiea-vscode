@@ -11,6 +11,7 @@
     -- something other than 'other' ideally
 - make a better readme [#61AE2]
 - move to its own repo and update package.json [#6428A]
+- looked into "verified publishing" to avoid the popup on the extension when installing. [#F1C91]
 
 [ISSUES]
 - // we need to keep a line number with our TODO in the taskp file for vscode decorators [src/scanner.js::48]

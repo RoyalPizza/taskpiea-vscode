@@ -20,13 +20,10 @@ export class Scanner {
      * @returns {Promise<{ issues: { keyword: string, file: string, lineNumber: number, content: string }[] }>} A promise that resolves with an object containing an array of issues found in the workspace.
      */
     async scan(fileName, settings, issuesLineNumber) {
+        if (issuesLineNumber === -1) return { issues: [] };
 
-        if (issuesLineNumber === -1) return;
-
-        let issues = [];
         let keywords = [];
         let excludePatterns = [];
-        let includePatterns = [];
 
         for (const setting of settings) {
             switch (setting.key) {
@@ -34,32 +31,25 @@ export class Scanner {
                     keywords.push(setting.value.trim());
                     break;
                 case core.SETTINGS_KEYS.SCANNER_EXCLUDE:
-                    // TODO: this is iffy. what if users want to be more explicity with this?
                     const trimmedValue = setting.value.trim();
-                    if (!trimmedValue.startsWith('**/') || !trimmedValue.endsWith('/**')) {
-                        excludePatterns.push(`**/${trimmedValue}/**`);
-                    } else {
-                        excludePatterns.push(trimmedValue);
-                    }
+                    excludePatterns.push(trimmedValue.startsWith('**/') && trimmedValue.endsWith('/**') ? trimmedValue : `**/${trimmedValue}/**`);
                     break;
             }
         }
 
-        // if we have no keywords, there is no way to scan
-        if (keywords.length === 0) return;
+        if (keywords.length === 0) return { issues: [] };
+        if (!excludePatterns.some(pattern => pattern.includes('.taskp'))) {
+            excludePatterns.push('**/*.taskp/**');
+        }
 
-        // we need to keep a line number with our TODO in the taskp file for vscode decorators
-        let newIssueLineNumber = issuesLineNumber + 1;
-
-        // add default incldues and excludes
-        includePatterns.push(...core.CODE_FILE_EXTENSIONS.map(ext => `**/*${ext}`));
-        excludePatterns.push(...core.EXCLUDED_DIRECTORIES.map(dir => `**/${dir}/**`));
-        excludePatterns.push('*.taskp');
+        const includePatterns = core.CODE_FILE_EXTENSIONS?.map(ext => `**/*${ext}`) ?? ['**/*'];
+        excludePatterns.push(...(core.EXCLUDED_DIRECTORIES?.map(dir => `**/${dir}/**`) ?? []));
 
         const files = await vscode.workspace.findFiles(`{${includePatterns.join(',')}}`, `{${excludePatterns.join(',')}}`);
-        //console.log(files.length + " files found to scan");
-        for (const file of files) {
-            //console.log("scanning " + file.path);
+        let newIssueLineNumber = issuesLineNumber + 1;
+        const issues = [];
+
+        await Promise.all(files.map(async file => {
             try {
                 const document = await vscode.workspace.openTextDocument(file);
                 const text = document.getText().split(/\r?\n/);
@@ -67,18 +57,21 @@ export class Scanner {
                     const line = text[i];
                     for (const keyword of keywords) {
                         if (line.match(new RegExp(`\\b${keyword}\\b`, 'i'))) {
-                            const issue = { keyword, file: vscode.workspace.asRelativePath(file), lineNumber: i, content: line.trim() };
+                            issues.push({
+                                keyword,
+                                file: vscode.workspace.asRelativePath(file),
+                                lineNumber: i,
+                                content: line.trim()
+                            });
                             newIssueLineNumber++;
-                            issues.push(issue);
                             break;
                         }
                     }
                 }
             } catch (e) {
-                // Skip non-text files (e.g., binary)
-                continue;
+                // Skip non-text files
             }
-        }
+        }));
 
         return { issues };
     }

@@ -22,16 +22,15 @@
     -- no reason to allow the flexibility to search keywords in non code files. 
     -- this should help speed up the search through files drastically.
     -- UPDATE: I hard coded this as a quick solution. But need to think on this.
+- fix scanner not allowing blazor style comments of @* [#38F65]
 
 [ISSUES]
 - Scanner.Keyword: TODO [src/core.js::73]
 - Scanner.Keyword: FIXME [src/core.js::74]
-- // TODO: this is iffy. what if users want to be more explicity with this? [src/scanner.js::36]
-- // we need to keep a line number with our TODO in the taskp file for vscode decorators [src/scanner.js::50]
-- // TODO: consider storing usedIds as ints for faster lookup over the hex string? (future) [src/parser.js::10]
 - // TODO: reset our scanner because the workspace changed? [src/extension.js::66]
 - // TODO: pull this from a cache instead of calling this again [src/extension.js::168]
 - // TODO: this method will not mark the file as dirty of the taskp file is open. But hitting save will save changes. Find solution that shows the file as dirty. [src/extension.js::179]
+- // TODO: consider storing usedIds as ints for faster lookup over the hex string? (future) [src/parser.js::10]
 
 [USERS]
 - royalpizza
